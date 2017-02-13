@@ -6,6 +6,7 @@ var width;//TODO make this dependant on the user radio buttons
 var height;
 var x_length;
 var y_length;
+var breadcrumb;
 
 document.addEventListener('keydown', function(event) {
     if(event.keyCode == 37) {
@@ -19,6 +20,10 @@ document.addEventListener('keydown', function(event) {
     }
     else if(event.keyCode == 40) {
         myCell.moveDown();
+    }
+    else if(event.keyCode == 66){
+        breadcrumb = !breadcrumb;
+        console.log(breadcrumb)
     }
 //    createWall();
 });
@@ -82,8 +87,13 @@ function cell(spec){
         var startPoint = (Math.PI/180)*0;
         var endPoint = (Math.PI/180)*360;
         context.arc(spec.position.x+12.5, spec.position.y+12.5,2.5,startPoint,endPoint,true);
-        context.fill();
         context.closePath();
+        if(breadcrumb){
+            context.fill();
+        }
+        else{
+            //TODO figure out a way to clear the board without killing the walls/main character
+        }
         context.fillStyle = spec.color;
         context.fillRect(spec.position.x,spec.position.y,spec.c_width,spec.c_height);
         spec.updateMe = false;
@@ -137,6 +147,7 @@ myCell = cell({
 
 
 function init(){
+    breadcrumb = false;
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
     x_length = 20;
