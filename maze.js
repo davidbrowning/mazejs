@@ -163,6 +163,23 @@ function fillChamber(chamber, x, y){
     }
 }
 
+function addAllWalls(x, y, walls){
+    var left = x-1
+    var right = x+1
+    var up = y-1
+    var down = y+1
+    try{
+        walls.push(matrix[left][y]);
+        walls.push(matrix[right][y]);
+        walls.push(matrix[x][up]);
+        walls.push(matrix[x][down]);
+    }
+    catch(err){
+        console.log(":( something happened")
+    }
+    console.log(walls)
+}
+
 function generateMaze(){
     var starter_x = Math.floor((Math.random() * x_length) % x_length);
     var starter_y = Math.floor((Math.random() * y_length) % y_length);
@@ -179,8 +196,10 @@ function generateMaze(){
     //        Make the wall a passage and mark the unvisited cell as part of the maze.
     //        Add the neighboring walls of the cell to the wall list.
     //    Remove the wall from the list.
-
+    walls = []
+    addAllWalls(starter_x, starter_y, walls)
     drawMaze = true;
+
 }
 
 function gameLoop(timestamp){
