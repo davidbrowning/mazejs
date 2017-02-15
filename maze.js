@@ -177,12 +177,34 @@ function addAllWalls(x, y, walls){
     catch(err){
         console.log(":( something happened")
     }
-    console.log(walls)
+    return walls
+}
+
+//This is knuth-shuffle by coolaj86 on github.com 
+//https://github.com/coolaj86/knuth-shuffle
+
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
 }
 
 function generateMaze(){
-    var starter_x = Math.floor((Math.random() * x_length) % x_length);
-    var starter_y = Math.floor((Math.random() * y_length) % y_length);
+    var starter_x = 1 + Math.floor((Math.random() * x_length) % (x_length - 2));
+    var starter_y = 1 + Math.floor((Math.random() * y_length) % (y_length - 2));
     matrix[starter_x][starter_y].makeFree();
     matrix[0][0].makeFree()
     matrix[matrix.length-1][matrix.length-1].makeFree()
@@ -197,7 +219,12 @@ function generateMaze(){
     //        Add the neighboring walls of the cell to the wall list.
     //    Remove the wall from the list.
     walls = []
-    addAllWalls(starter_x, starter_y, walls)
+    walls = addAllWalls(starter_x, starter_y, walls)
+	shuffle(walls)
+	while(walls.len > 0){
+		walls.pop()
+		console.log(walls)
+	}
     drawMaze = true;
 
 }
