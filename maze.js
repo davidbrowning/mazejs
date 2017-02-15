@@ -7,6 +7,7 @@ var height;
 var x_length;
 var y_length;
 var breadcrumb;
+var drawMaze;
 
 document.addEventListener('keydown', function(event) {
     if(event.keyCode == 37) {
@@ -41,6 +42,11 @@ function cell(spec){
     }
     that.isFree = function(){
         return spec.empty;
+    }
+    that.makeFree = function(){
+        spec.empty = !spec.empty;
+        spec.color = 'rgb(250,250,250)'
+        spec.updateMe = true;
     }
     that.moveRight = function(){
         if(matrix[spec.mx_x + 1][spec.mx_y].isFree()){
@@ -105,32 +111,7 @@ function cell(spec){
     return that;
 }
 
-myOtherWall = cell({
-    position: {x: 50, y: 0},
-    c_height: 25,
-    c_width: 25,
-    color: 'rgb(25,25,25)',
-    mx_x:2,
-    mx_y:0,
-    updateMe: true,
-    empty: false
-})
 
-myWall = cell({
-    position: {x: 0, y: 25},
-    c_height: 25,
-    c_width: 25,
-    color: 'rgb(25,25,25)',
-    isWall: true,
-    up : false,
-    down : false,
-    right : false,
-    left : false,
-    mx_x : 0,
-    mx_y : 1,
-    updateMe: true,
-    empty: false
-})
 
 myCell = cell({
     position: {x: 0, y: 0},
@@ -141,7 +122,7 @@ myCell = cell({
     mx_x : 0,
     mx_y : 0,
     color: 'rgb(0,255,0)',
-    isWall: false,
+    visited: false,
     updateMe: true
 })
 
@@ -157,8 +138,8 @@ function init(){
     for (var i = 0; i < 20; i ++){
         matrix[i] = new Array(20);
         for(var j = 0; j < 20; j++){
-            matrix[i][j] = (cell({position: {x: i * width, y: j* height},mx_x: i, mx_y: j, empty: true,isWall: false}));
-        }
+            matrix[i][j] = (cell({position: {x: i * width, y: j* height},c_width: width, c_height: height,mx_x: i, mx_y: j, empty: false,visited: false, color: 'rgb(25,25,25)', updateMe: true}));
+           }
     }
     generateMaze()
     gameLoop(performance.now());
@@ -183,8 +164,23 @@ function fillChamber(chamber, x, y){
 }
 
 function generateMaze(){
-    var chamber = matrix;
-    fillChamber(chamber, x_length, y_length)
+    var starter_x = Math.floor((Math.random() * x_length) % x_length);
+    var starter_y = Math.floor((Math.random() * y_length) % y_length);
+    matrix[starter_x][starter_y].makeFree();
+    matrix[0][0].makeFree()
+    matrix[matrix.length-1][matrix.length-1].makeFree()
+    //TODO draw maze
+    
+    //From Wikipedia
+    //Start with a grid full of walls.
+    //Pick a cell, mark it as part of the maze. Add the walls of the cell to the wall list.
+    //While there are walls in the list:
+    //    Pick a random wall from the list. If only one of the two cells that the wall divides is visited, then:
+    //        Make the wall a passage and mark the unvisited cell as part of the maze.
+    //        Add the neighboring walls of the cell to the wall list.
+    //    Remove the wall from the list.
+
+    drawMaze = true;
 }
 
 function gameLoop(timestamp){
@@ -196,16 +192,22 @@ function gameLoop(timestamp){
 function update(list){
     if(myCell.getUpdateStatus()){
         list.push(myCell);
-        list.push(myWall);
-        list.push(myOtherWall);
-        console.log(matrix[myWall.getX()][myWall.getY()]);
+        //console.log(matrix[myWall.getX()][myWall.getY()]);
     }
-    matrix[myWall.getX()][myWall.getY()] = myWall;
-    matrix[myOtherWall.getX()][myOtherWall.getY()] = myOtherWall;
+    //matrix[myWall.getX()][myWall.getY()] = myWall;
+    //matrix[myOtherWall.getX()][myOtherWall.getY()] = myOtherWall;
 }
 
 function render(list){
     context.save();
+    if(drawMaze){
+        matrix.forEach(function(el){
+            el.forEach(function(ce){
+                ce.draw();
+            })
+        })
+        drawMaze = false;
+    }
     list.forEach(function(el){
         el.draw();
     })
