@@ -165,18 +165,21 @@ function fillChamber(chamber, x, y){
 }
 
 function addAllWalls(x, y, walls){
-    var left = x-1
-    var right = x+1
-    var up = y-1
-    var down = y+1
-    try{
+    var left = x-2
+    var right = x+2
+    var up = y-2
+    var down = y+2
+    if(left > -1 && !matrix[left][y].isFree() ){
         walls.push(matrix[left][y]);
-        walls.push(matrix[right][y]);
-        walls.push(matrix[x][up]);
-        walls.push(matrix[x][down]);
     }
-    catch(err){
-        console.log(":( something happened")
+    if(right < x_length && !matrix[right][y].isFree()){
+        walls.push(matrix[right][y]);
+    }
+    if(up > -1 && !matrix[x][up].isFree()){
+        walls.push(matrix[x][up]);
+    }
+    if(down < y_length && !matrix[x][down].isFree()){
+        walls.push(matrix[x][down]);
     }
     return walls
 }
@@ -223,10 +226,29 @@ function generateMaze(){
     walls = []
     walls = addAllWalls(starter_x, starter_y, walls)
 	shuffle(walls)
+    placeHolder = [starter_x, starter_y];
+    console.log(placeHolder)
     //console.log(walls.length)
 	while(walls.length > 0){
+        shuffle(walls)
 		t = walls.pop()
-        matrix[t.getX()][t.getY()].makeFree()
+        if(!matrix[placeHolder[0]][placeHolder[1]].isFree() || !matrix[t.getX()][t.getY()].isFree()){
+         if(t.getX() > placeHolder[0]){
+            matrix[t.getX() - 1][t.getY()].makeFree()
+         }
+         else if(t.getX() < placeHolder[0]){
+             matrix[t.getX() + 1][t.getY()].makeFree()
+        }
+        else if(t.getY() > placeHolder[1]){
+            matrix[t.getX()][t.getY() - 1].makeFree()
+        }
+        else if(t.getY() < placeHolder[1]){
+            matrix[t.getX()][t.getY() + 1].makeFree()
+        }
+         matrix[t.getX()][t.getY()].makeFree()
+        }
+        placeHolder = [t.getX(), t.getY()]
+        addAllWalls(t.getX(), t.getY(), walls)
         //console.log(t)
 	}
     drawMaze = true;
