@@ -24,7 +24,7 @@ document.addEventListener('keydown', function(event) {
     }
     else if(event.keyCode == 66){
         breadcrumb = !breadcrumb;
-        console.log(breadcrumb)
+       //console.log(breadcrumb)
     }
 //    createWall();
 });
@@ -55,7 +55,7 @@ function cell(spec){
             spec.position.x = spec.position.x + spec.c_width;
             spec.mx_x = spec.position.x / width;
             spec.mx_y = spec.position.y / height;
-            console.log("x: ",spec.mx_x, "y: ",spec.mx_y);
+           //console.log("x: ",spec.mx_x, "y: ",spec.mx_y);
             spec.updateMe = true;
         }
     }
@@ -65,7 +65,7 @@ function cell(spec){
             spec.position.x = spec.position.x - spec.c_width;
             spec.mx_x = spec.position.x / width;
             spec.mx_y = spec.position.y / height;
-            console.log("x: ",spec.mx_x, "y: ",spec.mx_y);
+           //console.log("x: ",spec.mx_x, "y: ",spec.mx_y);
             spec.updateMe = true;
         }
     }
@@ -75,7 +75,7 @@ function cell(spec){
             spec.position.y = spec.position.y - spec.c_height;
             spec.mx_x = spec.position.x / width;
             spec.mx_y = spec.position.y / height;
-            console.log("x: ",spec.mx_x, "y: ",spec.mx_y);
+           //console.log("x: ",spec.mx_x, "y: ",spec.mx_y);
             spec.updateMe = true;
         }
     }
@@ -85,7 +85,7 @@ function cell(spec){
             spec.position.y = spec.position.y + spec.c_height;
             spec.mx_x = spec.position.x / width;
             spec.mx_y = spec.position.y / height;
-            console.log("x: ",spec.mx_x, "y: ",spec.mx_y);
+           //console.log("x: ",spec.mx_x, "y: ",spec.mx_y);
             spec.updateMe = true;
         }
     }
@@ -116,8 +116,8 @@ function cell(spec){
 
 myCell = cell({
     position: {x: 0, y: 0},
-    c_height: 25,
-    c_width: 25,
+    c_height: 50,
+    c_width: 50,
     up: false,
     down : false,
     mx_x : 0,
@@ -132,13 +132,13 @@ function init(){
     breadcrumb = false;
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
-    x_length = 20;
-    y_length = 20;
+    x_length = 10;
+    y_length = 10;
     width = canvas.width / x_length;
     height = canvas.height / y_length;
-    for (var i = 0; i < 20; i ++){
-        matrix[i] = new Array(20);
-        for(var j = 0; j < 20; j++){
+    for (var i = 0; i < 10; i ++){
+        matrix[i] = new Array(10);
+        for(var j = 0; j < 10; j++){
             matrix[i][j] = (cell({position: {x: i * width, y: j* height},c_width: width, c_height: height,mx_x: i, mx_y: j, empty: false,visited: false, color: 'rgb(25,25,25)', updateMe: false}));
            }
     }
@@ -146,23 +146,6 @@ function init(){
     gameLoop(performance.now());
 }
 
-function makeVerticalWall(r){
-    console.log(r);
-}
-
-function makeHorizontalWall(r){
-    console.log(r);
-}
-
-function fillChamber(chamber, x, y){
-    if(x == 1 && y == 1){ return }
-    else{
-        r = Math.floor((Math.random() * x))
-        makeVerticalWall(r)
-        r = Math.floor(Math.random() * y)
-        makeHorizontalWall(r)
-    }
-}
 
 function addAllWalls(x, y, walls){
     var left = x-2
@@ -210,9 +193,9 @@ function generateMaze(){
     var starter_x = 1 + Math.floor((Math.random() * x_length) % (x_length - 2));
     var starter_y = 1 + Math.floor((Math.random() * y_length) % (y_length - 2));
     matrix[starter_x][starter_y].makeFree();
-    matrix[0][1].makeFree();
-    matrix[1][0].makeFree();
-    matrix[matrix.length-1][matrix.length-1].makeFree()
+    //matrix[0][1].makeFree();
+    //matrix[1][0].makeFree();
+    //matrix[matrix.length-1][matrix.length-1].makeFree()
     //TODO draw maze
     
     //From Wikipedia
@@ -226,29 +209,38 @@ function generateMaze(){
     walls = []
     walls = addAllWalls(starter_x, starter_y, walls)
 	shuffle(walls)
-    placeHolder = [starter_x, starter_y];
-    console.log(placeHolder)
+    console.log("walls:"+ walls.length)
+    //placeHolder = [starter_x, starter_y];
+    //console.log(placeHolder)
     //console.log(walls.length)
 	while(walls.length > 0){
         shuffle(walls)
 		t = walls.pop()
-        if(!matrix[placeHolder[0]][placeHolder[1]].isFree() || !matrix[t.getX()][t.getY()].isFree()){
-         if(t.getX() > placeHolder[0]){
-            matrix[t.getX() - 1][t.getY()].makeFree()
-         }
-         else if(t.getX() < placeHolder[0]){
-             matrix[t.getX() + 1][t.getY()].makeFree()
-        }
-        else if(t.getY() > placeHolder[1]){
-            matrix[t.getX()][t.getY() - 1].makeFree()
-        }
-        else if(t.getY() < placeHolder[1]){
-            matrix[t.getX()][t.getY() + 1].makeFree()
-        }
-         matrix[t.getX()][t.getY()].makeFree()
+        //if(!matrix[placeHolder[0]][placeHolder[1]].isFree() || !matrix[t.getX()][t.getY()].isFree()){
+        //if(t.getX() > placeHolder[0]){
+        //    matrix[t.getX() - 1][t.getY()].makeFree()
+        //}
+        //else if(t.getX() < placeHolder[0]){
+        //    matrix[t.getX() + 1][t.getY()].makeFree()
+        //}
+        //else if(t.getY() > placeHolder[1]){
+        //    matrix[t.getX()][t.getY() - 1].makeFree()
+        //}
+        //else if(t.getY() < placeHolder[1]){
+        //    matrix[t.getX()][t.getY() + 1].makeFree()
+        //} 
+        //TODO I need to devise a means by which I
+        //can have a referece either to the maze from
+        //the new random cell, or from the random cell 
+        //to the existing maze. 
+
+        if(){ 
+            matrix[t.getX()][t.getY()].makeFree()
         }
         placeHolder = [t.getX(), t.getY()]
+        console.log(placeHolder)
         addAllWalls(t.getX(), t.getY(), walls)
+        console.log((walls.length))
         //console.log(t)
 	}
     drawMaze = true;
@@ -265,7 +257,7 @@ function update(list){
         el.forEach(function(ce){
             if(ce.getUpdateStatus()){
                 list.push(ce);
-                console.log(ce.getX(), ce.getY())
+               //console.log(ce.getX(), ce.getY())
             }
         })
     })
