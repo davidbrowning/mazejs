@@ -148,20 +148,20 @@ function init(){
 
 
 function addAllWalls(x, y, walls){
-    var left = x-2
-    var right = x+2
-    var up = y-2
-    var down = y+2
-    if(left > -1 && !matrix[left][y].isFree() ){
+    var left = x-1
+    var right = x+1
+    var up = y-1
+    var down = y+1
+    if(left > 0 && !matrix[left-1][y].isFree() ){
         walls.push(matrix[left][y]);
     }
-    if(right < x_length && !matrix[right][y].isFree()){
+    if(right < x_length-1 && !matrix[right+1][y].isFree()){
         walls.push(matrix[right][y]);
     }
-    if(up > -1 && !matrix[x][up].isFree()){
+    if(up > 0 && !matrix[x][up-1].isFree()){
         walls.push(matrix[x][up]);
     }
-    if(down < y_length && !matrix[x][down].isFree()){
+    if(down < y_length-1 && !matrix[x][down+1].isFree()){
         walls.push(matrix[x][down]);
     }
     return walls
@@ -189,10 +189,46 @@ function shuffle(array) {
   return array;
 }
 
+function getAdjacentCell(adj, existingMaze, t){
+    //Will revisit this idea
+}
+function makePath(axis, direction, t){
+    if(axis == 'x'){
+        if(direction == 'left'){
+            if(!matrix[t.getX()-1][t.getY()].isFree()){
+                matrix[t.getX()][t.getY()].makeFree();
+                matrix[t.getX()-1][t.getY()].makeFree();
+            }
+        }
+        else if(!matrix[t.getX()+1][t.getY()].isFree()){
+            matrix[t.getX()][t.getY()].makeFree();
+            matrix[t.getX()+1][t.getY()].makeFree();
+        }
+    }
+    else if(axis == 'y'){
+        if(direction == 'up'){ 
+            if(!matrix[t.getX()][t.getY()-1].isFree()){
+                matrix[t.getX()][t.getY()].makeFree();
+                matrix[t.getX()][t.getY()-1].makeFree();
+            }
+        }
+        else if(!matrix[t.getX()][t.getY()+1].isFree()){
+            matrix[t.getX()][t.getY()].makeFree();
+            matrix[t.getX()][t.getY()+1].makeFree();
+        }
+    }
+}
+
+function freeUpEnds(){
+    //TODO Make start and beginning accessible
+}
+
 function generateMaze(){
     var starter_x = 1 + Math.floor((Math.random() * x_length) % (x_length - 2));
     var starter_y = 1 + Math.floor((Math.random() * y_length) % (y_length - 2));
     matrix[starter_x][starter_y].makeFree();
+    var existingMaze = []
+    existingMaze.push(matrix[starter_x][starter_y])
     //matrix[0][1].makeFree();
     //matrix[1][0].makeFree();
     //matrix[matrix.length-1][matrix.length-1].makeFree()
@@ -216,6 +252,9 @@ function generateMaze(){
 	while(walls.length > 0){
         shuffle(walls)
 		t = walls.pop()
+        if(walls.length > 500){
+            break;
+        }
         //if(!matrix[placeHolder[0]][placeHolder[1]].isFree() || !matrix[t.getX()][t.getY()].isFree()){
         //if(t.getX() > placeHolder[0]){
         //    matrix[t.getX() - 1][t.getY()].makeFree()
@@ -233,13 +272,37 @@ function generateMaze(){
         //can have a referece either to the maze from
         //the new random cell, or from the random cell 
         //to the existing maze. 
-
-        if(){ 
-            matrix[t.getX()][t.getY()].makeFree()
+        //var adj;
+        //if(getAdjacentCell(adj, existingMaze, t)){ 
+        //    matrix[t.getX()][t.getY()].makeFree()
+        //    existingMaze.push(matrix[t.getX()][t.getY()])
+        //}
+        //TODO step three from algorithm
+        //check adjacent cells in each direction, as soon as one is empty, check the one opposite it. 
+        var mazeMemberCell;
+        if(t.getX() > 0 && t.getX() < x_length-1){
+            if(t.getY() > 0 && t.getY() < y_length-1){
+                if(matrix[t.getX() -1][t.getY()].isFree()){
+                    makePath('x','right', t);
+                    addAllWalls(t.getX()+1, t.getY(), walls)
+                }
+                else if(matrix[t.getX()+1][t.getY()].isFree()){
+                    makePath('x', 'left', t);
+                    addAllWalls(t.getX()-1, t.getY(), walls)
+                }
+                else if(matrix[t.getX()][t.getY()-1].isFree()){
+                    makePath('y', 'down', t);
+                    addAllWalls(t.getX(), t.getY()+1, walls)
+                }
+                else if(matrix[t.getX()][t.getY()+1].isFree()){
+                    makePath('y', 'up', t);
+                    addAllWalls(t.getX(), t.getY()-1, walls)
+                }
+            }
         }
+        freeUpEnds();
         placeHolder = [t.getX(), t.getY()]
         console.log(placeHolder)
-        addAllWalls(t.getX(), t.getY(), walls)
         console.log((walls.length))
         //console.log(t)
 	}
