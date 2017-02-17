@@ -91,13 +91,13 @@ function cell(spec){
     }
     that.draw = function(){
         context.fillStyle = 'rgba(100,0,100,1)';
-       // var startPoint = (Math.PI/180)*0;
-       // var endPoint = (Math.PI/180)*360;
-       // context.arc(spec.position.x+12.5, spec.position.y+12.5,2.5,startPoint,endPoint,true);
-       // context.closePath();
-       // if(breadcrumb){
-       //     context.fill();
-       // }
+        //var startPoint = (Math.PI/180)*0;
+        //var endPoint = (Math.PI/180)*360;
+        //context.arc(spec.position.x+25, spec.position.y+25,5,startPoint,endPoint,true);
+        //context.closePath();
+        //if(breadcrumb){
+        //    context.fill();
+        //}
        // else{
        //     //TODO figure out a way to clear the board without killing the walls/main character
        // }
@@ -219,10 +219,6 @@ function makePath(axis, direction, t){
     }
 }
 
-function freeUpEnds(){
-    //TODO Make start and beginning accessible
-}
-
 function generateMaze(){
     var starter_x = 1 + Math.floor((Math.random() * x_length) % (x_length - 2));
     var starter_y = 1 + Math.floor((Math.random() * y_length) % (y_length - 2));
@@ -300,13 +296,47 @@ function generateMaze(){
                 }
             }
         }
-        freeUpEnds();
         placeHolder = [t.getX(), t.getY()]
         console.log(placeHolder)
         console.log((walls.length))
         //console.log(t)
 	}
+    freeUpEnds();
     drawMaze = true;
+}
+
+function freeUpEnds(){
+    //TODO Make start and beginning accessible
+    if(!matrix[0][1].isFree() && !matrix[1][0].isFree()){        
+        var i = 1
+        var j = 0
+        matrix[j][i].makeFree()
+        while(!matrix[j+1][i].isFree() && !matrix[j][i+1].isFree()){
+            var xory = Math.floor((Math.random() * 2) % 2);
+            if(xory == 1){
+                j+=1
+            }
+            else{
+                i+=1
+            }
+            matrix[j][i].makeFree()
+        }
+    }
+    if(!matrix[x_length -1][y_length-2].isFree() && !matrix[x_length -2][y_length-1].isFree()){        
+        var i = y_length-2
+        var j = x_length-1
+        matrix[j][i].makeFree()
+        while(!matrix[j-1][i].isFree() && !matrix[j][i-1].isFree()){
+            var xory = math.floor((math.random() * 2) % 2);
+            if(xory == 1){
+                j-=1
+            }
+            else{
+                i-=1
+            }
+            matrix[j][i].makeFree()
+        }
+    }
 }
 
 function gameLoop(timestamp){
