@@ -48,6 +48,11 @@ function cell(spec){
         spec.color = 'rgb(250,250,250)'
         spec.updateMe = true;
     }
+    that.makeEnd = function(){
+        spec.empty = true
+        spec.color = 'rgb(10,100,200)'
+        spec.updateMe = true;
+    }
     that.moveRight = function(){
         if(matrix[spec.mx_x + 1][spec.mx_y].isFree()){
             matrix[that.getX()][that.getY()].makeFree()
@@ -98,9 +103,6 @@ function cell(spec){
         //if(breadcrumb){
         //    context.fill();
         //}
-       // else{
-       //     //TODO figure out a way to clear the board without killing the walls/main character
-       // }
         context.fillStyle = spec.color;
         context.fillRect(spec.position.x,spec.position.y,spec.c_width,spec.c_height);
         spec.updateMe = false;
@@ -323,8 +325,8 @@ function freeUpEnds(){
         }
     }
     if(!matrix[x_length -1][y_length-2].isFree() && !matrix[x_length -2][y_length-1].isFree()){        
-        var i = y_length-2
-        var j = x_length-1
+        var i = y_length-1
+        var j = x_length-2
         matrix[j][i].makeFree()
         while(!matrix[j-1][i].isFree() && !matrix[j][i-1].isFree()){
             var xory = math.floor((math.random() * 2) % 2);
@@ -337,6 +339,7 @@ function freeUpEnds(){
             matrix[j][i].makeFree()
         }
     }
+    matrix[x_length-1][y_length-1].makeEnd()
 }
 
 function gameLoop(timestamp){
