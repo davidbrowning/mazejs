@@ -37,6 +37,19 @@ document.addEventListener('keydown', function(event) {
     else if(event.keyCode == 89){
         showScore = !showScore;
     }
+    else if(event.keyCode == 72){
+        var randomDirection = Math.floor(Math.random() * 4);    
+        var right = 'right'
+        var left = 'left'
+        var up = 'up'
+        var down = 'down'
+        var dir = []
+        dir.push(right)
+        dir.push(left)
+        dir.push(up)
+        dir.push(down)
+        alert(dir[randomDirection])
+    }
 //    createWall();
 })
 
@@ -188,7 +201,7 @@ function init(size){
            }
     }
     generateMaze()
-    gameLoop(performance.now());
+    gameLoop(new Date());
 }
 
 function solveMaze(x, y){
