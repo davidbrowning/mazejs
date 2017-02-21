@@ -109,7 +109,7 @@ function cell(spec){
         if(spec.crumbs){
             var startPoint = (Math.PI/180)*0;
             var endPoint = (Math.PI/180)*360;
-            context.arc(spec.position.x+25, spec.position.y+25,5,startPoint,endPoint,true);
+            context.arc(spec.position.x+(width/2), spec.position.y+(width/2),(width/4),startPoint,endPoint,true);
             context.closePath();
             if(breadcrumb){
                 context.fill();
@@ -137,10 +137,17 @@ function cell(spec){
 
 
 function init(){
+    breadcrumb = false;
+    canvas = document.getElementById('canvas');
+    context = canvas.getContext('2d');
+    x_length = 100;
+    y_length = 100;
+    width = canvas.width / x_length;
+    height = canvas.height / y_length;
     myCell = cell({
         position: {x: 0, y: 0},
-        c_height: 50,
-        c_width: 50,
+        c_height: height,
+        c_width: width,
         up: false,
         down : false,
         mx_x : 0,
@@ -150,16 +157,9 @@ function init(){
         updateMe: true,
         crumbs: true
     })
-    breadcrumb = false;
-    canvas = document.getElementById('canvas');
-    context = canvas.getContext('2d');
-    x_length = 10;
-    y_length = 10;
-    width = canvas.width / x_length;
-    height = canvas.height / y_length;
-    for (var i = 0; i < 10; i ++){
-        matrix[i] = new Array(10);
-        for(var j = 0; j < 10; j++){
+    for (var i = 0; i < x_length; i ++){
+        matrix[i] = new Array(x_length);
+        for(var j = 0; j < x_length; j++){
             matrix[i][j] = (cell({position: {x: i * width, y: j* height},c_width: width, c_height: height,mx_x: i, mx_y: j, empty: false,visited: false, color: 'rgb(25,25,25)', updateMe: false}));
            }
     }
@@ -363,7 +363,7 @@ function freeUpEnds(){
         var j = x_length-2
         matrix[j][i].makeFree()
         while(!matrix[j-1][i].isFree() && !matrix[j][i-1].isFree()){
-            var xory = math.floor((math.random() * 2) % 2);
+            var xory = Math.floor((Math.random() * 2) % 2);
             if(xory == 1){
                 j-=1
             }
@@ -378,11 +378,13 @@ function freeUpEnds(){
 
 function gameLoop(timestamp){
     list = []
-    update(list);
-    render(list);
+    scoreboard_stats = []
+    update(list, timestamp, scoreboard_stats);
+    render(list, timestamp, scoreboard_stats);
+    requestAnimationFrame(gameLoop);
 }
 
-function update(list){
+function update(list, t, scoreboard_stats){
     matrix.forEach(function(el){
         el.forEach(function(ce){
             if(ce.getUpdateStatus()){
@@ -394,9 +396,23 @@ function update(list){
     if(myCell.getUpdateStatus()){
         list.push(myCell);
     }
+    if((Math.floor(t) % 1000) < 60){
+        list.push(1)
+        time=t/1000
+        time=Math.floor(time)
+        score = 100-time 
+        scoreboard_stats.push(time)
+        scoreboard_stats.push(score)
+    }
+    else{list.push(0)}
 }
 
-function render(list){
+function render(list, t, s){
+    if(list.pop() == 1){
+        score=s.pop()
+        time=s.pop()
+        document.getElementById("scoreboard").innerHTML=('seconds elapsed: '+time+" \n Your Score: "+score);
+    }
     context.save();
     if(drawMaze){
         matrix.forEach(function(el){
@@ -410,5 +426,4 @@ function render(list){
         el.draw();
     })
     context.restore();
-    requestAnimationFrame(gameLoop);
 }
