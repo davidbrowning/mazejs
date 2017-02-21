@@ -8,18 +8,21 @@ var x_length;
 var y_length;
 var breadcrumb;
 var drawMaze;
+var showScore;
+var gameOver;
+var initializer;
 
 document.addEventListener('keydown', function(event) {
-    if(event.keyCode == 37) {
+    if(event.keyCode == 65) {
         myCell.moveLeft();
     }
-    else if(event.keyCode == 39) {
+    else if(event.keyCode == 68) {
         myCell.moveRight();
     }
-    else if(event.keyCode == 38) {
+    else if(event.keyCode == 87) {
         myCell.moveUp();
     }
-    else if(event.keyCode == 40) {
+    else if(event.keyCode == 83) {
         myCell.moveDown();
     }
     else if(event.keyCode == 66){
@@ -31,10 +34,23 @@ document.addEventListener('keydown', function(event) {
         var y = myCell.getY()
         solveMaze(x, y)
     }
+    else if(event.keyCode == 89){
+        showScore = !showScore;
+    }
 //    createWall();
 })
 
-
+function start_menu(){ 
+    canvas = document.getElementById('canvas');
+    context = canvas.getContext('2d');
+    var grd = context.createRadialGradient(250,250,115,190,30,100);
+    grd.addColorStop(0,"red");
+    grd.addColorStop(1,"white");
+    context.fillStyle = grd;
+    context.fillRect(0,0,500,500);context.save()
+    context.font = "30px Arial";
+    context.strokeText("Welcome To the MAZE", 100,240);
+}
 
 function cell(spec){
     let that = {};
@@ -132,16 +148,24 @@ function cell(spec){
     return that;
 }
 
+function split(value){
 
+    init(value)
 
+}
 
-
-function init(){
+function init(size){
+    if(typeof size === "undefined"){
+        size = 5;
+        initializer = 0
+    }
+    initializer += 1
     breadcrumb = false;
+    showScore = false;
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
-    x_length = 100;
-    y_length = 100;
+    x_length = size;
+    y_length = size;
     width = canvas.width / x_length;
     height = canvas.height / y_length;
     myCell = cell({
@@ -168,8 +192,8 @@ function init(){
 }
 
 function solveMaze(x, y){
-    console.log('x',x)
-    console.log('y',y)
+   //console.log('x',x)
+   //console.log('y',y)
     my_x = x
     my_y = y
     end_x = x_length -1
@@ -188,7 +212,7 @@ function solveMaze(x, y){
         matrix[el.getX()][el.getY()].setPath()    
     })
     
-    console.log('finished')
+   //console.log('finished')
 }
 
 function addAllSpaces(x, y, walls, solve){
@@ -220,7 +244,7 @@ function addAllSpaces(x, y, walls, solve){
             solve.push(matrix[x][down]);
         }
     }
-    console.log('walls.length',walls.length)
+   //console.log('walls.length',walls.length)
     return walls
 }
 
@@ -305,7 +329,7 @@ function generateMaze(){
     walls = []
     walls = addAllWalls(starter_x, starter_y, walls)
 	shuffle(walls)
-    console.log("walls:"+ walls.length)
+   //console.log("walls:"+ walls.length)
 	while(walls.length > 0){
         shuffle(walls)
 		t = walls.pop()
@@ -334,8 +358,8 @@ function generateMaze(){
             }
         }
         placeHolder = [t.getX(), t.getY()]
-        console.log(placeHolder)
-        console.log((walls.length))
+       //console.log(placeHolder)
+       //console.log((walls.length))
 	}
     freeUpEnds();
     drawMaze = true;
@@ -381,7 +405,10 @@ function gameLoop(timestamp){
     scoreboard_stats = []
     update(list, timestamp, scoreboard_stats);
     render(list, timestamp, scoreboard_stats);
-    requestAnimationFrame(gameLoop);
+    if(!gameOver){
+        requestAnimationFrame(gameLoop);
+    } // couldn't figure out a decent way to handle extra loops so....
+    else{location.reload()}
 }
 
 function update(list, t, scoreboard_stats){
@@ -396,34 +423,68 @@ function update(list, t, scoreboard_stats){
     if(myCell.getUpdateStatus()){
         list.push(myCell);
     }
-    if((Math.floor(t) % 1000) < 60){
+    if((Math.floor(t) % 1000) < 60 && showScore===true){
         list.push(1)
         time=t/1000
         time=Math.floor(time)
         score = 100-time 
+        highscore = score
+        scoreboard_stats.push(highscore)
         scoreboard_stats.push(time)
         scoreboard_stats.push(score)
     }
+    else if(showScore===false){
+        list.push(2)
+    }
     else{list.push(0)}
+    
+    my_x = myCell.getX()
+    my_y = myCell.getY()
+    end_x = x_length -1
+    end_y = y_length -1
+    if(my_x == end_x){
+        if(my_y == end_y){
+            gameOver = true
+            list.push(1)
+            time=t/1000
+            time=Math.floor(time)
+            score = 100-time 
+            scoreboard_stats.push(time)
+            scoreboard_stats.push(score)
+        }
+    }
 }
 
 function render(list, t, s){
-    if(list.pop() == 1){
-        score=s.pop()
-        time=s.pop()
-        document.getElementById("scoreboard").innerHTML=('seconds elapsed: '+time+" \n Your Score: "+score);
-    }
-    context.save();
-    if(drawMaze){
-        matrix.forEach(function(el){
-            el.forEach(function(ce){
-                ce.draw();
+    var score;
+    var time;
+    if(!gameOver){
+        var test = list.pop()
+        if(test == 1 ){
+            score=s.pop()
+            time=s.pop()
+            hs=s.pop()
+            document.getElementById("scoreboard").innerHTML=('seconds elapsed: '+time+" \n Your Score: "+score+' High Score: '+hs);
+        }
+        else if(test == 2){
+            document.getElementById("scoreboard").innerHTML='';
+        }
+        context.save();
+        if(drawMaze){
+            matrix.forEach(function(el){
+                el.forEach(function(ce){
+                    ce.draw();
+                })
             })
+            drawMaze = false;
+       }
+        list.forEach(function(el){
+            el.draw();
         })
-        drawMaze = false;
+        context.restore();
     }
-    list.forEach(function(el){
-        el.draw();
-    })
-    context.restore();
+    else{
+        score=s.pop()
+        alert('Game Over!, you scored: '+score+' Congratulations');
+    }
 }

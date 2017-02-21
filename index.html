@@ -2,11 +2,37 @@
 <html>
 <meta charset="utf-8"/>
 <link rel = "stylesheet" type="text/css" href = ./style.css>
-<body onload = 'init()'>
+<body onload = 'start_menu()'>
 <canvas id="canvas" width = "500" height = "500">
 </canvas>
 <div id="scoreboard">
-    This is the scoreboard
+</div>
+<div>
+    <br>
+    <p>
+    You may begin a game by simply selecting dimensions, or by clicking on "GO!"
+    </p>
+    <p>
+    Note on the breadcrumbs: You must cleanup after yourself! I mean, you put the breadcrumbs there! I'm not your mother.
+    </p>
+    <p>
+    Move with the wasd keys, to display your score, press 'y', for the aforementioned breadcrumbs press 'b', and if you get lost, press 'p'. For a hint, press 'h'
+    </p>
+    <form action = init()>
+        <select name="sel" onChange="split(value)">
+            <option value=5>5x5</option>
+            <option value=10>10x10</option>
+            <option value=20>20x20</option>
+            <option value=50>50x50</option>
+        </select>
+        <br><br>
+        <button type="button" onclick="init(5)">GO!</button>
+    </form>
+    <!--<input type="radio" name="five" value="5" checked>5x5 <br>
+    <input type="radio" name="ten" value="10" >10x10 <br>
+    <input type="radio" name="twenty" value="20" >20x20 <br>
+    <input type="radio" name="fifty" value="50" >50x50 -->
+</form>
 </div>
 <script src = "maze.js"></script>
 </body>
