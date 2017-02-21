@@ -26,8 +26,13 @@ document.addEventListener('keydown', function(event) {
         breadcrumb = !breadcrumb;
        //console.log(breadcrumb)
     }
+    else if(event.keyCode == 80){
+        var x = myCell.getX()
+        var y = myCell.getY()
+        solveMaze(x, y)
+    }
 //    createWall();
-});
+})
 
 
 
@@ -40,6 +45,11 @@ function cell(spec){
     that.getY = function(){
         return spec.mx_y;
     }
+    that.setPath = function(){
+        spec.color = 'rgb(0,200,100)'
+        spec.updateMe = true;
+    }
+
     that.isFree = function(){
         return spec.empty;
     }
@@ -96,16 +106,24 @@ function cell(spec){
     }
     that.draw = function(){
         context.fillStyle = 'rgba(100,0,100,1)';
-        //var startPoint = (Math.PI/180)*0;
-        //var endPoint = (Math.PI/180)*360;
-        //context.arc(spec.position.x+25, spec.position.y+25,5,startPoint,endPoint,true);
-        //context.closePath();
-        //if(breadcrumb){
-        //    context.fill();
-        //}
+        if(spec.crumbs){
+            var startPoint = (Math.PI/180)*0;
+            var endPoint = (Math.PI/180)*360;
+            context.arc(spec.position.x+25, spec.position.y+25,5,startPoint,endPoint,true);
+            context.closePath();
+            if(breadcrumb){
+                context.fill();
+            }
+        }
         context.fillStyle = spec.color;
         context.fillRect(spec.position.x,spec.position.y,spec.c_width,spec.c_height);
         spec.updateMe = false;
+    }
+    that.setVisited = function(){
+        spec.visited = true;
+    }
+    that.isVisited = function(){
+        return spec.visited;
     }
     that.getUpdateStatus = function(){
         return spec.updateMe;
@@ -116,21 +134,22 @@ function cell(spec){
 
 
 
-myCell = cell({
-    position: {x: 0, y: 0},
-    c_height: 50,
-    c_width: 50,
-    up: false,
-    down : false,
-    mx_x : 0,
-    mx_y : 0,
-    color: 'rgb(0,255,0)',
-    visited: false,
-    updateMe: true
-})
 
 
 function init(){
+    myCell = cell({
+        position: {x: 0, y: 0},
+        c_height: 50,
+        c_width: 50,
+        up: false,
+        down : false,
+        mx_x : 0,
+        mx_y : 0,
+        color: 'rgb(0,255,0)',
+        visited: false,
+        updateMe: true,
+        crumbs: true
+    })
     breadcrumb = false;
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
@@ -148,6 +167,62 @@ function init(){
     gameLoop(performance.now());
 }
 
+function solveMaze(x, y){
+    console.log('x',x)
+    console.log('y',y)
+    my_x = x
+    my_y = y
+    end_x = x_length -1
+    end_y = y_length -1
+    solution = []
+    path = []
+    while(x !== end_x || y !== end_y){
+        matrix[x][y].setVisited()
+        matrix[x][y].setPath()
+        addAllSpaces(x,y,path,solution)
+        next = path.pop()
+        x = next.getX()
+        y = next.getY()
+    }
+    solution.forEach(function(el){
+        matrix[el.getX()][el.getY()].setPath()    
+    })
+    
+    console.log('finished')
+}
+
+function addAllSpaces(x, y, walls, solve){
+    var left = x-1
+    var right = x+1
+    var up = y-1
+    var down = y+1
+    if((left > -1 )&& (matrix[left][y].isFree()===true)){
+        if(!matrix[left][y].isVisited()){
+            walls.push(matrix[left][y]);
+            solve.push(matrix[left][y]);
+        }
+    }
+    if((right < x_length) && (matrix[right][y].isFree()===true)){
+        if(!matrix[right][y].isVisited()){
+            walls.push(matrix[right][y]);
+            solve.push(matrix[right][y]);
+        }
+    }
+    if((up > -1) && (matrix[x][up].isFree()===true)){
+        if(!matrix[x][up].isVisited()){
+            walls.push(matrix[x][up]);
+            solve.push(matrix[x][up]);
+        }
+    }
+    if((down < y_length) && (matrix[x][down].isFree()===true)){
+        if(!matrix[x][down].isVisited()){
+            walls.push(matrix[x][down]);
+            solve.push(matrix[x][down]);
+        }
+    }
+    console.log('walls.length',walls.length)
+    return walls
+}
 
 function addAllWalls(x, y, walls){
     var left = x-1
@@ -227,56 +302,16 @@ function generateMaze(){
     matrix[starter_x][starter_y].makeFree();
     var existingMaze = []
     existingMaze.push(matrix[starter_x][starter_y])
-    //matrix[0][1].makeFree();
-    //matrix[1][0].makeFree();
-    //matrix[matrix.length-1][matrix.length-1].makeFree()
-    //TODO draw maze
-    
-    //From Wikipedia
-    //Start with a grid full of walls.
-    //Pick a cell, mark it as part of the maze. Add the walls of the cell to the wall list.
-    //While there are walls in the list:
-    //    Pick a random wall from the list. If only one of the two cells that the wall divides is visited, then:
-    //        Make the wall a passage and mark the unvisited cell as part of the maze.
-    //        Add the neighboring walls of the cell to the wall list.
-    //    Remove the wall from the list.
     walls = []
     walls = addAllWalls(starter_x, starter_y, walls)
 	shuffle(walls)
     console.log("walls:"+ walls.length)
-    //placeHolder = [starter_x, starter_y];
-    //console.log(placeHolder)
-    //console.log(walls.length)
 	while(walls.length > 0){
         shuffle(walls)
 		t = walls.pop()
         if(walls.length > 500){
             break;
         }
-        //if(!matrix[placeHolder[0]][placeHolder[1]].isFree() || !matrix[t.getX()][t.getY()].isFree()){
-        //if(t.getX() > placeHolder[0]){
-        //    matrix[t.getX() - 1][t.getY()].makeFree()
-        //}
-        //else if(t.getX() < placeHolder[0]){
-        //    matrix[t.getX() + 1][t.getY()].makeFree()
-        //}
-        //else if(t.getY() > placeHolder[1]){
-        //    matrix[t.getX()][t.getY() - 1].makeFree()
-        //}
-        //else if(t.getY() < placeHolder[1]){
-        //    matrix[t.getX()][t.getY() + 1].makeFree()
-        //} 
-        //TODO I need to devise a means by which I
-        //can have a referece either to the maze from
-        //the new random cell, or from the random cell 
-        //to the existing maze. 
-        //var adj;
-        //if(getAdjacentCell(adj, existingMaze, t)){ 
-        //    matrix[t.getX()][t.getY()].makeFree()
-        //    existingMaze.push(matrix[t.getX()][t.getY()])
-        //}
-        //TODO step three from algorithm
-        //check adjacent cells in each direction, as soon as one is empty, check the one opposite it. 
         var mazeMemberCell;
         if(t.getX() > 0 && t.getX() < x_length-1){
             if(t.getY() > 0 && t.getY() < y_length-1){
@@ -301,7 +336,6 @@ function generateMaze(){
         placeHolder = [t.getX(), t.getY()]
         console.log(placeHolder)
         console.log((walls.length))
-        //console.log(t)
 	}
     freeUpEnds();
     drawMaze = true;
